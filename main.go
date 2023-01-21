@@ -114,7 +114,49 @@ func patch_data(short_url, long_url string) error {
 		if err != nil {
 			return err
 		}
+		//短链接是否存在
+		if len(data_map[short_url]) == 0 {
+			return ErrLinkNotFound
+		}
 		data_map[short_url] = long_url
+		//尝试将最终的map转为json字符串
+		json_string, err := MapToJson(data_map)
+		if err != nil {
+			return err
+		}
+		//尝试写入文件
+		err = os.WriteFile("data.json", []byte(json_string), 0755)
+		if err != nil {
+			return err
+		}
+	} else if os.IsNotExist(err) {
+		return err
+	} else {
+		return err
+	}
+	return nil
+}
+
+func del_data(short_url string) error {
+	//查询数据库是否存在
+	_, err := os.Stat("data.json")
+	if err == nil {
+		//存在则读取文件
+		file_data, err := os.ReadFile("data.json")
+		if err != nil {
+			return err
+		}
+		//解析
+		data_map, err := JsonToMap(string(file_data))
+		if err != nil {
+			return err
+		}
+		//短链接是否存在
+		if len(data_map[short_url]) == 0 {
+			return ErrLinkNotFound
+		}
+		delete(data_map, short_url)
+
 		//尝试将最终的map转为json字符串
 		json_string, err := MapToJson(data_map)
 		if err != nil {
@@ -205,10 +247,39 @@ func main() {
 		}
 		err := patch_data(short_url, long_url)
 		if err != nil {
-			context.JSON(http.StatusInternalServerError, gin.H{"info": err.Error()})
-			return
+			if err == ErrLinkNotFound {
+				context.JSON(http.StatusNotFound, gin.H{"info": err.Error()})
+				return
+			} else {
+				context.JSON(http.StatusInternalServerError, gin.H{"info": err.Error()})
+				return
+			}
 		}
 		context.JSON(http.StatusOK, gin.H{"info": "OK"})
+	})
+
+	app.DELETE("/:id", func(context *gin.Context) {
+		short_url := context.Param("id")
+		user := context.Query("user")
+		pwd := context.Query("pwd")
+
+		bytes := (sha256.Sum256([]byte(pwd)))
+		hashcode := hex.EncodeToString(bytes[:])
+		if user_info[user] != hashcode {
+			context.JSON(http.StatusForbidden, gin.H{"info": "Password incorrect."})
+			return
+		}
+		err := del_data(short_url)
+		if err != nil {
+			if err == ErrLinkNotFound {
+				context.JSON(http.StatusNotFound, gin.H{"info": err.Error()})
+				return
+			} else {
+				context.JSON(http.StatusInternalServerError, gin.H{"info": err.Error()})
+				return
+			}
+		}
+		context.JSON(http.StatusNoContent, gin.H{"info": "OK"})
 	})
 
 	app.Run(":80")
