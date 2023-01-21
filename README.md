@@ -21,10 +21,12 @@ You should create `data.json` and `user.json` in the work dir.
 
 ```JSON
 {
-    "admin": "hash" //SHA-256 of your password.
-    //You can add many users, but it's useless because it doesn't have a permission management system
+    "admin": "hash" 
 }
 ```
+
+You need to set user's value as SHA-256 of your password.
+You can add many users, but it's useless because we doesn't have a permission management system.
 
 ## API
 
@@ -43,5 +45,4 @@ The following table lists the details of these APIs:
 By default, the requests from browser(GET method) will go to first API, if the short URL was found in the database, it will returned a 307 (Temporary redirect)
 
 Obviously, the first API doesn't require an authentication.
-s
 And the remaining three APIs require username and password as parameters to auth.
