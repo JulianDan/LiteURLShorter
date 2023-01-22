@@ -38,10 +38,10 @@ func MapToJson(m map[string]string) (string, error) {
 func get_long_url(short_url string) (string, error) {
 	var long_url string
 	//查询数据库是否存在
-	_, err := os.Stat("data.json")
+	_, err := os.Stat("./data.json")
 	if err == nil {
 		//存在则读取文件
-		file_data, err := os.ReadFile("data.json")
+		file_data, err := os.ReadFile("./data.json")
 		if err != nil {
 			return "", err
 		}
@@ -65,10 +65,10 @@ func get_long_url(short_url string) (string, error) {
 
 func write_data(short_url, long_url string) error {
 	//查询数据库是否存在
-	_, err := os.Stat("data.json")
+	_, err := os.Stat("./data.json")
 	if err == nil {
 		//存在则读取文件
-		file_data, err := os.ReadFile("data.json")
+		file_data, err := os.ReadFile("./data.json")
 		if err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func write_data(short_url, long_url string) error {
 			return err
 		}
 		//尝试写入文件
-		err = os.WriteFile("data.json", []byte(json_string), 0755)
+		err = os.WriteFile("./data.json", []byte(json_string), 0755)
 		if err != nil {
 			return err
 		}
@@ -102,10 +102,10 @@ func write_data(short_url, long_url string) error {
 
 func patch_data(short_url, long_url string) error {
 	//查询数据库是否存在
-	_, err := os.Stat("data.json")
+	_, err := os.Stat("./data.json")
 	if err == nil {
 		//存在则读取文件
-		file_data, err := os.ReadFile("data.json")
+		file_data, err := os.ReadFile("./data.json")
 		if err != nil {
 			return err
 		}
@@ -125,7 +125,7 @@ func patch_data(short_url, long_url string) error {
 			return err
 		}
 		//尝试写入文件
-		err = os.WriteFile("data.json", []byte(json_string), 0755)
+		err = os.WriteFile("./data.json", []byte(json_string), 0755)
 		if err != nil {
 			return err
 		}
@@ -139,10 +139,10 @@ func patch_data(short_url, long_url string) error {
 
 func del_data(short_url string) error {
 	//查询数据库是否存在
-	_, err := os.Stat("data.json")
+	_, err := os.Stat("./data.json")
 	if err == nil {
 		//存在则读取文件
-		file_data, err := os.ReadFile("data.json")
+		file_data, err := os.ReadFile("./data.json")
 		if err != nil {
 			return err
 		}
@@ -163,7 +163,7 @@ func del_data(short_url string) error {
 			return err
 		}
 		//尝试写入文件
-		err = os.WriteFile("data.json", []byte(json_string), 0755)
+		err = os.WriteFile("./data.json", []byte(json_string), 0755)
 		if err != nil {
 			return err
 		}
@@ -177,10 +177,10 @@ func del_data(short_url string) error {
 
 func main() {
 	user_info := make(map[string]string)
-	_, err := os.Stat("user.json")
+	_, err := os.Stat("./user.json")
 	if err == nil {
 		//存在则读取文件
-		file_data, err := os.ReadFile("user.json")
+		file_data, err := os.ReadFile("./user.json")
 		if err != nil {
 			panic("Can't load user data.")
 		}
@@ -195,6 +195,11 @@ func main() {
 
 	app := gin.Default()
 	app.SetTrustedProxies(nil)
+
+	//default page
+	app.GET("/", func(context *gin.Context) {
+		context.JSON(http.StatusNotFound, gin.H{"info": "can't find target short link"})
+	})
 
 	app.GET("/:id", func(context *gin.Context) {
 		//获取短链接对应的长连接
@@ -282,5 +287,5 @@ func main() {
 		context.JSON(http.StatusNoContent, gin.H{"info": "OK"})
 	})
 
-	app.Run(":80")
+	app.Run("127.0.0.1:9895")
 }
