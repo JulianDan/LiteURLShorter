@@ -22,11 +22,11 @@ You should create `data.json` and `user.json` in the work dir.
 
 ```JSON
 {
-    "username": "SHA-256 Of Your Password" 
+    "username": "SHA-256 of Your Password" 
 }
 ```
 
-You can add many users, but it's useless because we doesn't have a permission management system.
+You can add many users, but it's useless because we don't have permission management system.
 
 ## API
 
